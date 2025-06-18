@@ -9,19 +9,15 @@ import { AlertCircle, RotateCcw } from "lucide-react"
 
 // Utility functions
 const gcd = (a: number, b: number): number => {
-  return b === 0 ? a : gcd(b, a % b)
-}
+  return b < 0.001 ? a : gcd(b, a % b); 
+};
 
 const simplifyRatio = (width: number, height: number): [number, number] => {
-  // Find the number of decimal places in each input
-  const widthDecimals = (width.toString().split(".")[1] || "").length;
-  const heightDecimals = (height.toString().split(".")[1] || "").length;
-  const factor = Math.pow(10, Math.max(widthDecimals, heightDecimals));
-  const intWidth = Math.round(width * factor);
-  const intHeight = Math.round(height * factor);
-  const divisor = gcd(intWidth, intHeight);
-  return [intWidth / divisor, intHeight / divisor];
-}
+  const divisor = gcd(Math.abs(width), Math.abs(height));
+  const simplifiedWidth = Math.round(width / divisor);
+  const simplifiedHeight = Math.round(height / divisor);
+  return [simplifiedWidth, simplifiedHeight];
+};
 
 // Color conversion utilities
 const hexToRgb = (hex: string): [number, number, number] | null => {
@@ -311,53 +307,58 @@ function PixelRemConverter() {
 }
 
 function AspectRatioCalculator() {
-  const [width, setWidth] = useState("")
-  const [height, setHeight] = useState("")
-  const [ratio, setRatio] = useState("")
-  const [decimal, setDecimal] = useState("")
-  const [error, setError] = useState("")
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
+  const [ratio, setRatio] = useState("");
+  const [decimal, setDecimal] = useState("");
+  const [error, setError] = useState("");
 
   const calculateRatio = (w: string, h: string) => {
-    setError("")
+    setError("");
 
     if (!w || !h) {
-      setRatio("")
-      setDecimal("")
-      return
+      setRatio("");
+      setDecimal("");
+      return;
     }
 
-    const widthNum = Number.parseFloat(w)
-    const heightNum = Number.parseFloat(h)
+    const widthNum = Number.parseFloat(w);
+    const heightNum = Number.parseFloat(h);
 
     if (isNaN(widthNum) || isNaN(heightNum) || widthNum <= 0 || heightNum <= 0) {
-      setError("Please enter valid positive numbers")
-      setRatio("")
-      setDecimal("")
-      return
+      setError("Please enter valid positive numbers");
+      setRatio("");
+      setDecimal("");
+      return;
     }
 
-    const [simplifiedWidth, simplifiedHeight] = simplifyRatio(widthNum, heightNum)
+    // Always calculate decimal ratio
+    const decimalRatio = widthNum / heightNum;
+    setDecimal(decimalRatio.toFixed(3));
 
+    // Try to simplify to integer ratio
+    const [simplifiedWidth, simplifiedHeight] = simplifyRatio(widthNum, heightNum);
+
+    // Only show integer ratio if values are reasonable (e.g., < 100) to avoid large numbers
     if (
       Number.isInteger(simplifiedWidth) &&
       Number.isInteger(simplifiedHeight) &&
-      simplifiedWidth < 10000 &&
-      simplifiedHeight < 10000
+      simplifiedWidth < 100 &&
+      simplifiedHeight < 100
     ) {
-      setRatio(`${simplifiedWidth}:${simplifiedHeight}`)
+      setRatio(`${simplifiedWidth}:${simplifiedHeight}`);
     } else {
-      setRatio(`${(widthNum / heightNum).toFixed(2)}:1`)
+      setRatio(`${decimalRatio.toFixed(2)}:1`);
     }
-    setDecimal((widthNum / heightNum).toFixed(3))
-  }
+  };
 
   const reset = () => {
-    setWidth("")
-    setHeight("")
-    setRatio("")
-    setDecimal("")
-    setError("")
-  }
+    setWidth("");
+    setHeight("");
+    setRatio("");
+    setDecimal("");
+    setError("");
+  };
 
   return (
     <Card>
@@ -374,8 +375,8 @@ function AspectRatioCalculator() {
               placeholder="Enter width"
               value={width}
               onChange={(e) => {
-                setWidth(e.target.value)
-                calculateRatio(e.target.value, height)
+                setWidth(e.target.value);
+                calculateRatio(e.target.value, height);
               }}
             />
           </div>
@@ -387,8 +388,8 @@ function AspectRatioCalculator() {
               placeholder="Enter height"
               value={height}
               onChange={(e) => {
-                setHeight(e.target.value)
-                calculateRatio(width, e.target.value)
+                setHeight(e.target.value);
+                calculateRatio(width, e.target.value);
               }}
             />
           </div>
@@ -401,10 +402,10 @@ function AspectRatioCalculator() {
           </div>
         )}
 
-        {ratio && (
+        {(ratio || decimal) && (
           <div className="p-4 bg-muted rounded-lg">
-            <div className="text-lg font-semibold">Aspect Ratio: {ratio}</div>
-            <div className="text-sm text-muted-foreground">Decimal: {decimal}</div>
+            {ratio && <div className="text-lg font-semibold">Aspect Ratio: {ratio}</div>}
+            {decimal && <div className="text-sm text-muted-foreground">Decimal: {decimal}</div>}
           </div>
         )}
 
@@ -414,9 +415,8 @@ function AspectRatioCalculator() {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }
-
 function ColorConverter() {
   const [input, setInput] = useState("")
   const [colors, setColors] = useState<any>(null)
