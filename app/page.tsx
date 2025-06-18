@@ -337,7 +337,17 @@ function AspectRatioCalculator() {
     }
 
     const [simplifiedWidth, simplifiedHeight] = simplifyRatio(widthNum, heightNum)
-    setRatio(`${simplifiedWidth}:${simplifiedHeight}`)
+
+    if (
+      Number.isInteger(simplifiedWidth) &&
+      Number.isInteger(simplifiedHeight) &&
+      simplifiedWidth < 10000 &&
+      simplifiedHeight < 10000
+    ) {
+      setRatio(`${simplifiedWidth}:${simplifiedHeight}`)
+    } else {
+      setRatio(`${(widthNum / heightNum).toFixed(2)}:1`)
+    }
     setDecimal((widthNum / heightNum).toFixed(3))
   }
 
