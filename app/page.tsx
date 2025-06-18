@@ -13,8 +13,14 @@ const gcd = (a: number, b: number): number => {
 }
 
 const simplifyRatio = (width: number, height: number): [number, number] => {
-  const divisor = gcd(width, height)
-  return [width / divisor, height / divisor]
+  // Find the number of decimal places in each input
+  const widthDecimals = (width.toString().split(".")[1] || "").length;
+  const heightDecimals = (height.toString().split(".")[1] || "").length;
+  const factor = Math.pow(10, Math.max(widthDecimals, heightDecimals));
+  const intWidth = Math.round(width * factor);
+  const intHeight = Math.round(height * factor);
+  const divisor = gcd(intWidth, intHeight);
+  return [intWidth / divisor, intHeight / divisor];
 }
 
 // Color conversion utilities
