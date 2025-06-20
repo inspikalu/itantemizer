@@ -144,7 +144,7 @@ const parseColor = (input: string): any => {
   }
 
   // RGB/RGBA
-  const rgbMatch = trimmed.match(/rgba?$$(\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?$$/)
+  const rgbMatch = trimmed.match(/^rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\s*\)$/)
   if (rgbMatch) {
     const r = Number.parseInt(rgbMatch[1])
     const g = Number.parseInt(rgbMatch[2])
@@ -172,7 +172,7 @@ const parseColor = (input: string): any => {
   }
 
   // HSL/HSLA
-  const hslMatch = trimmed.match(/hsla?$$(\d+),\s*(\d+)%,\s*(\d+)%(?:,\s*([\d.]+))?$$/)
+  const hslMatch = trimmed.match(/^hsla?\(\s*(\d+),\s*(\d+)%?,\s*(\d+)%?(?:,\s*([\d.]+))?\s*\)$/)
   if (hslMatch) {
     const h = Number.parseInt(hslMatch[1])
     const s = Number.parseInt(hslMatch[2])
